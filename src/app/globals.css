@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-cream: #fff8f2;
+  --color-rose-200: #f5c6d6;
+  --color-rose-600: #c76a82;
+  --color-cocoa-600: #8b5a3c;
+  --color-cocoa-800: #5c3a24;
+}
+
+html, body {
+  background-color: var(--color-cream);
+  color: var(--color-cocoa-800);
+  font-feature-settings: "ss01", "kern";
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  direction: rtl;
+}
+
+button, input, textarea, select {
+  font: inherit;
+}
+
+/* Tiptap עורך טקסט עשיר — סגנון בסיסי */
+.tiptap {
+  min-height: 12rem;
+  outline: none;
+  line-height: 1.7;
+}
+.tiptap p { margin: 0.4rem 0; }
+.tiptap h1 { font-size: 1.4rem; font-weight: 700; color: var(--color-cocoa-800); margin: 0.8rem 0 0.4rem; }
+.tiptap h2 { font-size: 1.2rem; font-weight: 700; color: var(--color-cocoa-800); margin: 0.7rem 0 0.3rem; }
+.tiptap ul, .tiptap ol { padding-inline-start: 1.4rem; margin: 0.5rem 0; }
+.tiptap ul { list-style: disc; }
+.tiptap ol { list-style: decimal; }
+.tiptap strong { font-weight: 700; color: var(--color-cocoa-800); }
+.tiptap em { font-style: italic; }
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: #b8a190;
+  pointer-events: none;
+  height: 0;
+  float: right;
+}
+
+/* תצוגת HTML של סיכום שיעור (להורה ולמורה) */
+.prose-summary {
+  line-height: 1.75;
+  color: var(--color-cocoa-800);
+}
+.prose-summary h1, .prose-summary h2 { color: var(--color-cocoa-800); font-weight: 700; }
+.prose-summary h1 { font-size: 1.25rem; margin: 0.8rem 0 0.4rem; }
+.prose-summary h2 { font-size: 1.1rem; margin: 0.7rem 0 0.3rem; }
+.prose-summary p { margin: 0.4rem 0; }
+.prose-summary ul, .prose-summary ol { padding-inline-start: 1.4rem; margin: 0.5rem 0; }
+.prose-summary ul { list-style: disc; }
+.prose-summary ol { list-style: decimal; }
+.prose-summary strong { font-weight: 700; }
+.prose-summary em { font-style: italic; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .animate-soft-fade {
+    animation: softFade 0.35s ease-out;
+  }
+}
+@keyframes softFade {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: none; }
+}
