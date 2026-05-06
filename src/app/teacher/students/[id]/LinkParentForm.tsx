@@ -6,7 +6,12 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
-type RpcResult = { ok: boolean; error?: string; parent_user_id?: string };
+type RpcResult = {
+  ok: boolean;
+  error?: string;
+  parent_user_id?: string;
+  pending?: boolean;
+};
 
 export function LinkParentForm({ studentId }: { studentId: string }) {
   const router = useRouter();
@@ -52,7 +57,13 @@ export function LinkParentForm({ studentId }: { studentId: string }) {
       return;
     }
 
-    setMessage("הקישור בוצע! ההורה יוכל להיכנס ולראות את הסיכומים.");
+    if (result.pending) {
+      setMessage(
+        "המייל נשמר. ברגע שההורה ייכנס דרך הקישור שנשלח אליו במייל — הקישור יושלם אוטומטית.",
+      );
+    } else {
+      setMessage("הקישור בוצע! ההורה יוכל להיכנס ולראות את הסיכומים.");
+    }
     router.refresh();
   }
 

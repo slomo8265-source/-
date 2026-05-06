@@ -28,12 +28,15 @@ export default function NewStudentPage() {
 
     // 1. נסי לאתר משתמש קיים לפי המייל. אם לא קיים — הצעי לשלוח magic link דרך הטופס בטלפון/מייל
     //    בפועל, נשמור את הילד בלי parent_user_id; כשההורה ייכנס לראשונה עם המייל הזה, נקשר ידנית.
+    const trimmedParentEmail = parentEmail.trim();
+
     const { data: created, error: insertErr } = await supabase
       .from("students")
       .insert({
         full_name: fullName.trim(),
         birth_date: birthDate || null,
         parent_user_id: null,
+        parent_email: trimmedParentEmail || null,
       })
       .select("id")
       .single();
@@ -61,21 +64,15 @@ export default function NewStudentPage() {
     //    כאן נשתמש בעמודת user_metadata של ההורה אם נרשם, או ב-auth.admin אם יש service role.
     //    לפשטות: שולחים magic link להורה. כשייכנס — מקבל role=parent, אבל הקישור לתלמיד
     //    יישמר בעמודה parent_user_id ע"י המורה (היא תעדכן את הילד בידנית).
-    if (parentEmail.trim()) {
+    // שולחים magic link להורה. כשייכנס לראשונה, ה-trigger handle_new_user
+    // יקשר אותו אוטומטית לתלמיד (לפי parent_email שנשמר על השורה).
+    if (trimmedParentEmail) {
       const siteUrl =
         process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin;
       await supabase.auth.signInWithOtp({
-        email: parentEmail.trim(),
+        email: trimmedParentEmail,
         options: { emailRedirectTo: `${siteUrl}/auth/callback` },
       });
-      // נשמור את המייל של ההורה ב-localStorage לתזכורת לקישור ידני
-      try {
-        const pending = JSON.parse(
-          localStorage.getItem("pendingParents") ?? "{}",
-        );
-        pending[created.id] = parentEmail.trim();
-        localStorage.setItem("pendingParents", JSON.stringify(pending));
-      } catch {}
     }
 
     router.push(`/teacher/students/${created.id}`);
