@@ -8,6 +8,7 @@ import { CardBalanceMeter } from "@/components/CardBalanceMeter";
 import { LessonFeed } from "@/components/LessonFeed";
 import { LinkParentForm } from "./LinkParentForm";
 import { BackgroundNotesEditor } from "./BackgroundNotesEditor";
+import { DeleteStudentButton } from "./DeleteStudentButton";
 import { formatDateIL } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -167,6 +168,20 @@ export default async function StudentProfile({
         </div>
         <LessonFeed lessons={lessons ?? []} />
       </section>
+
+      {/* אזור מחיקה */}
+      <Card className="border-2 border-rose-200 bg-rose-50/40">
+        <h3 className="mb-2 text-sm font-semibold text-cocoa-700">
+          אזור מסוכן
+        </h3>
+        <p className="mb-3 text-xs text-cocoa-500">
+          מחיקת תלמיד תמחק לצמיתות את כל הכרטיסיות, השיעורים, וההערות שלו.
+        </p>
+        <DeleteStudentButton
+          studentId={student.id}
+          studentName={student.full_name}
+        />
+      </Card>
     </div>
   );
 }
