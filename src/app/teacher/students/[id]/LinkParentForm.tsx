@@ -6,6 +6,8 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
+type RpcResult = { ok: boolean; error?: string; parent_user_id?: string };
+
 export function LinkParentForm({ studentId }: { studentId: string }) {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -19,61 +21,54 @@ export function LinkParentForm({ studentId }: { studentId: string }) {
     setMessage(null);
     setSubmitting(true);
 
-    const supabase = createSupabaseBrowserClient();
+    const trimmedEmail = email.trim();
 
-    // RLS allows teacher to query profiles. We look up by joining via auth.users isn't available,
-    // so we ask the teacher to enter the parent's email AFTER they've signed in once.
-    // We query profiles → join requires a view. For simplicity, fetch all parent profiles
-    // and match against full_name? No — we need the email. Solution: we store the parent's
-    // email in their auth metadata, but RLS on profiles doesn't expose email directly.
-    //
-    // Practical approach: we store parent_email in students table after they first sign in,
-    // OR the teacher uses the Supabase dashboard. For MVP: the teacher pastes the parent's
-    // user UUID (they can find it in Supabase auth dashboard). This is documented in README.
-    //
-    // Better path: create an edge function. For now, accept the parent's UUID directly.
-
-    // The UI accepts either an email or UUID. If it's an email, we try to find via auth admin
-    // (requires service role). Since we don't have that client-side, we accept UUID only.
-
-    const isUuid =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-        email.trim(),
-      );
-
-    if (!isUuid) {
-      setError(
-        "כרגע יש להזין את ה-UUID של ההורה (מתוך Supabase → Authentication → Users). בעתיד נוסיף חיפוש לפי מייל.",
-      );
+    if (!trimmedEmail.includes("@")) {
+      setError("יש להזין מייל תקין");
       setSubmitting(false);
       return;
     }
 
-    const { error: updateErr } = await supabase
-      .from("students")
-      .update({ parent_user_id: email.trim() })
-      .eq("id", studentId);
+    const supabase = createSupabaseBrowserClient();
+
+    const { data, error: rpcErr } = await supabase.rpc(
+      "link_parent_to_student_by_email",
+      {
+        p_student_id: studentId,
+        p_parent_email: trimmedEmail,
+      },
+    );
 
     setSubmitting(false);
 
-    if (updateErr) {
-      setError(updateErr.message);
-    } else {
-      setMessage("הקישור בוצע! ההורה יוכל להיכנס ולראות את הסיכומים.");
-      router.refresh();
+    if (rpcErr) {
+      setError(rpcErr.message);
+      return;
     }
+
+    const result = data as RpcResult | null;
+    if (!result?.ok) {
+      setError(result?.error ?? "שגיאה לא ידועה");
+      return;
+    }
+
+    setMessage("הקישור בוצע! ההורה יוכל להיכנס ולראות את הסיכומים.");
+    router.refresh();
   }
 
   return (
     <form onSubmit={onSubmit} className="space-y-3">
       <Input
-        type="text"
+        type="email"
         dir="ltr"
         className="text-left text-sm"
-        placeholder="UUID של ההורה (מתוך Supabase Auth)"
+        placeholder="parent@example.com"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
       />
+      <p className="text-xs text-cocoa-500">
+        המייל של ההורה (חייב להיות זה שאיתו הוא נכנס לאפליקציה לראשונה).
+      </p>
       {error && (
         <p className="rounded-lg bg-rose-50 p-2 text-xs text-rose-700">{error}</p>
       )}
