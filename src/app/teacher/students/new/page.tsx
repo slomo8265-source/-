@@ -125,8 +125,8 @@ export default function NewStudentPage() {
               placeholder="parent@example.com"
             />
             <p className="mt-1 text-xs text-cocoa-400">
-              אם תזיני מייל — נשלח להורה קישור כניסה ראשונית. לאחר שייכנס, תוכלי
-              לקשר אותו לתלמיד מתוך תיק התלמיד.
+              אם תזיני מייל — נשלח להורה קישור כניסה במייל, וברגע שייכנס
+              לראשונה הוא יקושר אוטומטית לתלמיד.
             </p>
           </div>
 
